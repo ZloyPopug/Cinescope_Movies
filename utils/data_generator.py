@@ -24,7 +24,7 @@ class DataGenerator:
 
     @staticmethod
     def generate_random_location():
-        return f"{faker.city()}"
+        return random.choice(["MSK","SPB"])
 
     @staticmethod
     def generate_random_published():

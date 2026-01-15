@@ -22,7 +22,7 @@ def api_manager(session):
     return ApiManager(session)
 
 @pytest.fixture(scope="function")
-def test_movie():
+def movie_data():
     random_name = DataGenerator.generate_random_movie_name()
     random_imageUrl = DataGenerator.generate_random_image_url()
     random_price = DataGenerator.generate_random_price()
@@ -38,15 +38,5 @@ def test_movie():
         "description": random_description,
         "location": random_location,
         "published": random_published,
-        "genreId": random_genreId
+        "genreId": 1
     }
-
-# {
-#   "name": "Название фильма",
-#   "imageUrl": "https://image.url",
-#   "price": 100,
-#   "description": "Описание фильма",
-#   "location": "SPB",
-#   "published": true,
-#   "genreId": 1
-# }'
