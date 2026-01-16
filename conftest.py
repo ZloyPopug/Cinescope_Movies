@@ -38,5 +38,5 @@ def movie_data():
         "description": random_description,
         "location": random_location,
         "published": random_published,
-        "genreId": 1
+        "genreId": random_genreId
     }
