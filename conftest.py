@@ -40,3 +40,23 @@ def movie_data():
         "published": random_published,
         "genreId": random_genreId
     }
+
+@pytest.fixture(scope="function")
+def created_movie(api_manager: ApiManager,movie_data):
+    api_manager.auth_api.authenticate()
+    responce = api_manager.movies_api.create_movie(movie_data)
+    assert responce.status_code == 201
+    movie_info = responce.json()
+    movie_id = movie_info["id"]
+
+    yield movie_info
+    try:
+        api_manager.movies_api.delete_movie(movie_id, expected_status=200)
+    except ValueError as e:
+        if "Expected: 200" in str(e):
+            print(f"Фильм {movie_id} уже удален или не найден")
+        else:
+            raise
+
+
+
