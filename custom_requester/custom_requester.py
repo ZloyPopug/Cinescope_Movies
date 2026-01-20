@@ -19,7 +19,7 @@ class CustomRequester:
 
     def send_request(self, method, endpoint, data=None, params=None, expected_status=200, need_logging=True):
         url = f'{self.base_url}{endpoint}'
-        response = self.session.request(method,url,json=data,headers=self.headers)
+        response = self.session.request(method,url,json=data, params=params,headers=self.headers)
         if need_logging:
             self.log_request_and_response(response)
 

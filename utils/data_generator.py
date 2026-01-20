@@ -31,11 +31,15 @@ class DataGenerator:
         return random.choice([True,False])
 
     @staticmethod
-    def generate_random_genreId():
-        return random.randint(1,11)
+    def generate_random_genreId(exclude_genre_id=None):
+        genre_ids = list(range(1, 10))
+
+        if exclude_genre_id is not None and exclude_genre_id in genre_ids:
+            genre_ids.remove(exclude_genre_id)
+        return random.choice(genre_ids)
 
     @staticmethod
-    def generate_movie_data():
+    def generate_movie_data(exclude_genre_id=None):
         return {
             "name": DataGenerator.generate_random_movie_name(),
             "imageUrl": DataGenerator.generate_random_image_url(),
@@ -43,18 +47,18 @@ class DataGenerator:
             "description": DataGenerator.generate_random_description(),
             "location": DataGenerator.generate_random_location(),
             "published": DataGenerator.generate_random_published(),
-            "genreId": DataGenerator.generate_random_genreId()
+            "genreId": DataGenerator.generate_random_genreId(exclude_genre_id)
         }
 
     @staticmethod
     def generate_movie_filter_params():
         return {
-            "pageSize": random.choice([5, 10, 20, 50]),
+            "pageSize": random.choice([5, 10, 20]),
             "page": random.randint(1, 3),
             "minPrice": random.randint(1, 300),
             "maxPrice": random.randint(500, 1000),
             "locations": random.choice(["MSK","SPB"]),
             "published": random.choice(["true", "false"]),
-            "genreId": random.randint(1,11),
+            "genreId": random.randint(1,10),
             "createdAt": random.choice(["asc", "desc"])
         }

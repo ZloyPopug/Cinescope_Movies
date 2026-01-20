@@ -1,4 +1,3 @@
-
 from custom_requester.custom_requester import CustomRequester
 from constans import BASE_URL,MOVIE_ENDPOINT
 
@@ -33,5 +32,13 @@ class MoviesAPI(CustomRequester):
             method='PATCH',
             endpoint=f'{MOVIE_ENDPOINT}/{movie_id}',
             data=movie_data,
+            expected_status=expected_status
+        )
+
+    def get_movies_with_filters(self, params=None, expected_status=200):
+        return self.send_request(
+            method="GET",
+            endpoint=MOVIE_ENDPOINT,
+            params=params,
             expected_status=expected_status
         )

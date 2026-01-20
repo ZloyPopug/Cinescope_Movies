@@ -44,9 +44,9 @@ def movie_data():
 @pytest.fixture(scope="function")
 def created_movie(api_manager: ApiManager,movie_data):
     api_manager.auth_api.authenticate()
-    responce = api_manager.movies_api.create_movie(movie_data)
-    assert responce.status_code == 201
-    movie_info = responce.json()
+    response = api_manager.movies_api.create_movie(movie_data)
+    assert response.status_code == 201
+    movie_info = response.json()
     movie_id = movie_info["id"]
 
     yield movie_info
