@@ -57,6 +57,18 @@ def created_movie(api_manager: ApiManager,movie_data):
             print(f"Фильм {movie_id} уже удален или не найден")
         else:
             raise
+@pytest.fixture(scope="function")
+def reviews_data(api_manager: ApiManager,movie_data):
+    reviews_data = DataGenerator.generate_reviews_data()
+    return reviews_data
+
+@pytest.fixture(scope="function")
+def created_reviews(created_movie, reviews_data, api_manager: ApiManager):
+    api_manager.auth_api.authenticate()
+    movie_id = created_movie["id"]
+    api_manager.movies_api.create_reviews(movie_id=movie_id, reviews_data=reviews_data)
+    return movie_id
+
 
 
 

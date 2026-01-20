@@ -1,8 +1,6 @@
-from http.client import responses
-
 from utils.data_generator import DataGenerator
 from clients.api_manager import ApiManager
-from conftest import api_manager
+
 
 
 class TestMovies:

@@ -6,3 +6,6 @@ HEADERS = {
 
 LOGIN_ENDPOINT = "login"
 MOVIE_ENDPOINT = "movies"
+REVIEW_ENDPOINT = "reviews"
+HIDE_ENDPOINT = "reviews/hide"
+SHOW_ENDPOINT = "reviews/show"

@@ -62,3 +62,10 @@ class DataGenerator:
             "genreId": random.randint(1,10),
             "createdAt": random.choice(["asc", "desc"])
         }
+
+    @staticmethod
+    def generate_reviews_data():
+        return {
+            "rating": random.randint(1, 10),
+            "text": faker.catch_phrase()
+        }
