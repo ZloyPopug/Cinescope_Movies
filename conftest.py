@@ -1,6 +1,6 @@
 from clients.api_manager import ApiManager
 import requests
-from constans import BASE_URL,HEADERS,LOGIN_ENDPOINT
+from constans import BASE_URL
 import pytest
 from custom_requester.custom_requester import CustomRequester
 from utils.data_generator import DataGenerator
@@ -57,6 +57,7 @@ def created_movie(api_manager: ApiManager,movie_data):
             print(f"Фильм {movie_id} уже удален или не найден")
         else:
             raise
+
 @pytest.fixture(scope="function")
 def reviews_data(api_manager: ApiManager,movie_data):
     reviews_data = DataGenerator.generate_reviews_data()

@@ -1,5 +1,5 @@
 from custom_requester.custom_requester import CustomRequester
-from constans import BASE_URL,MOVIE_ENDPOINT,REVIEW_ENDPOINT,HIDE_ENDPOINT
+from constans import BASE_URL, MOVIE_ENDPOINT, REVIEW_ENDPOINT, HIDE_ENDPOINT, SHOW_ENDPOINT
 
 class MoviesAPI(CustomRequester):
     def __init__(self, session):
@@ -73,16 +73,16 @@ class MoviesAPI(CustomRequester):
             expected_status=expected_status
         )
 
-    def hide_review(self, movie_id, userid, expected_status=200):
+    def hide_review(self, movie_id, expected_status=200):
         return self.send_request(
             method="PATCH",
-            endpoint=f"{MOVIE_ENDPOINT}/{movie_id}/{HIDE_ENDPOINT}/{userid}",
+            endpoint=f"{MOVIE_ENDPOINT}/{movie_id}/{HIDE_ENDPOINT}",
             expected_status=expected_status
         )
 
-    def show_review(self, movie_id, userid, expected_status=200):
+    def show_review(self, movie_id, expected_status=200):
         return self.send_request(
             method="PATCH",
-            endpoint=f"{MOVIE_ENDPOINT}/{movie_id}/{HIDE_ENDPOINT}/{userid}",
+            endpoint=f"{MOVIE_ENDPOINT}/{movie_id}/{SHOW_ENDPOINT}",
             expected_status=expected_status
         )

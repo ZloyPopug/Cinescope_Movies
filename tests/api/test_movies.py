@@ -1,8 +1,6 @@
 from utils.data_generator import DataGenerator
 from clients.api_manager import ApiManager
 
-
-
 class TestMovies:
     def test_create_movie(self, api_manager: ApiManager, movie_data):
         api_manager.auth_api.authenticate()

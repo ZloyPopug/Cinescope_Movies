@@ -1,5 +1,3 @@
-from requests import session
-
 from constans import LOGIN_ENDPOINT
 from custom_requester.custom_requester import CustomRequester
 

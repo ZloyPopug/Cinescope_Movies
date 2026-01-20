@@ -98,3 +98,35 @@ class TestReviews:
         response_data = response.json()
         assert len(response_data) == 0
         assert response_data == []
+
+    def test_show_reviews(self, created_reviews, api_manager:ApiManager):
+        movies_id = created_reviews
+        response = api_manager.movies_api.show_review(movie_id=movies_id)
+        assert response.status_code == 200
+        response_data = response.json()
+        assert "text" in response_data
+        assert "rating" in response_data
+
+    def test_show_reviews_invalid_id(self, api_manager:ApiManager):
+        api_manager.auth_api.authenticate()
+        movie_data = -1
+        response = api_manager.movies_api.show_review(movie_id=movie_data, expected_status=404)
+        assert response.status_code == 404
+        response_data = response.json()
+        assert response_data["message"] == "Отзыв не найден"
+
+    def test_hide_reviews(self, created_reviews, api_manager:ApiManager):
+        movie_id = created_reviews
+        response = api_manager.movies_api.hide_review(movie_id=movie_id)
+        assert response.status_code == 200
+        response_data = response.json()
+        assert "text" in response_data
+        assert "rating" in response_data
+
+    def test_hide_reviews_invalid_id(self, api_manager:ApiManager):
+        api_manager.auth_api.authenticate()
+        movie_data = -1
+        response = api_manager.movies_api.show_review(movie_id=movie_data, expected_status=404)
+        assert response.status_code == 404
+        response_data = response.json()
+        assert response_data["message"] == "Отзыв не найден"
