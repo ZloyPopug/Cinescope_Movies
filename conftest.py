@@ -63,7 +63,7 @@ def reviews_data():
 def created_reviews(created_movie, reviews_data, api_manager: ApiManager):
     api_manager.auth_api.authenticate()
     movie_id = created_movie["id"]
-    api_manager.movies_api.create_reviews(movie_id=movie_id, reviews_data=reviews_data)
+    api_manager.reviews_api.create_reviews(movie_id=movie_id, reviews_data=reviews_data)
     return movie_id
 
 @pytest.fixture(scope="session")
