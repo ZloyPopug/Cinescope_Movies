@@ -5,10 +5,6 @@ import pytest
 from custom_requester.custom_requester import CustomRequester
 from utils.data_generator import DataGenerator
 
-@pytest.fixture(scope="session")
-def requester():
-    session = requests.Session()
-    return CustomRequester(session=session, base_url=BASE_URL)
 
 @pytest.fixture(scope="session")
 def session():
@@ -59,7 +55,7 @@ def created_movie(api_manager: ApiManager,movie_data):
             raise
 
 @pytest.fixture(scope="function")
-def reviews_data(api_manager: ApiManager,movie_data):
+def reviews_data():
     reviews_data = DataGenerator.generate_reviews_data()
     return reviews_data
 
@@ -69,6 +65,12 @@ def created_reviews(created_movie, reviews_data, api_manager: ApiManager):
     movie_id = created_movie["id"]
     api_manager.movies_api.create_reviews(movie_id=movie_id, reviews_data=reviews_data)
     return movie_id
+
+@pytest.fixture(scope="session")
+def auth_session(api_manager):
+    response = api_manager.auth_api.authenticate()
+    user_Id = response["user"]["id"]
+    return user_Id
 
 
 

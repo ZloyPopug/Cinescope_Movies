@@ -4,7 +4,6 @@ class TestReviews:
     def test_create_reviews(self, created_movie, reviews_data, api_manager:ApiManager):
         movie_id = created_movie["id"]
         response = api_manager.movies_api.create_reviews(movie_id=movie_id, reviews_data=reviews_data)
-        assert response.status_code == 201
         response_data = response.json()
         assert response_data["text"] == reviews_data["text"]
         assert response_data["rating"] == reviews_data["rating"]
@@ -15,26 +14,23 @@ class TestReviews:
             "rating": "test",
             "text": 123
         }
-        response = api_manager.movies_api.create_reviews(movie_id=movie_id, reviews_data=invalid_data, expected_status=400)
-        assert response.status_code == 400
+        api_manager.movies_api.create_reviews(movie_id=movie_id, reviews_data=invalid_data, expected_status=400)
 
-    def test_create_reviews_invalid_id(self, reviews_data, api_manager:ApiManager):
-        api_manager.auth_api.authenticate()
+
+    def test_create_reviews_invalid_id(self, reviews_data, auth_session, api_manager:ApiManager):
         movie_id = -1
-        response = api_manager.movies_api.create_reviews(movie_id=movie_id,reviews_data=reviews_data,expected_status=404)
-        assert response.status_code == 404
+        api_manager.movies_api.create_reviews(movie_id=movie_id,reviews_data=reviews_data,expected_status=404)
+
 
     def test_create_reviews_already_exists(self, created_reviews, reviews_data, api_manager:ApiManager):
         movie_id = created_reviews
         response = api_manager.movies_api.create_reviews(movie_id=movie_id, reviews_data=reviews_data, expected_status=409)
-        assert response.status_code == 409
         response_data = response.json()
         assert response_data["message"] == "Вы уже оставляли отзыв к этому фильму"
 
     def test_update_reviews(self,created_reviews, reviews_data, api_manager:ApiManager):
         movie_id = created_reviews
         response = api_manager.movies_api.update_reviews(movie_id=movie_id, reviews_data=reviews_data)
-        assert response.status_code == 200
         response_data = response.json()
         assert response_data["text"] == reviews_data["text"]
         assert response_data["rating"] == reviews_data["rating"]
@@ -49,18 +45,15 @@ class TestReviews:
             "rating": "test",
             "text": 123
         }
-        response = api_manager.movies_api.update_reviews(movie_id=movie_id, reviews_data=invalid_data, expected_status=400)
-        assert response.status_code == 400
+        api_manager.movies_api.update_reviews(movie_id=movie_id, reviews_data=invalid_data, expected_status=400)
 
     def test_update_reviews_invalid_id(self, reviews_data, created_reviews, api_manager:ApiManager):
         movie_id = -1
-        response = api_manager.movies_api.update_reviews(movie_id=movie_id, reviews_data=reviews_data, expected_status=404)
-        assert response.status_code == 404
+        api_manager.movies_api.update_reviews(movie_id=movie_id, reviews_data=reviews_data, expected_status=404)
 
     def test_delete_reviews(self, created_reviews, api_manager:ApiManager):
         movie_id = created_reviews
-        response = api_manager.movies_api.delete_reviews(movie_id=movie_id)
-        assert response.status_code == 200
+        api_manager.movies_api.delete_reviews(movie_id=movie_id)
         response = api_manager.movies_api.get_reviews(movie_id=movie_id, expected_status=200)
         reviews = response.json()
         assert len(reviews) == 0
@@ -69,14 +62,12 @@ class TestReviews:
         movie_id = created_reviews
         api_manager.movies_api.delete_reviews(movie_id=movie_id)
         response = api_manager.movies_api.delete_reviews(movie_id=movie_id, expected_status=404)
-        assert response.status_code == 404
         response_data = response.json()
         assert response_data["message"] == "Отзыв не найден"
 
     def test_get_reviews(self, created_reviews, api_manager:ApiManager):
         movies_id = created_reviews
         response = api_manager.movies_api.get_reviews(movie_id=movies_id)
-        assert response.status_code == 200
         response_data = response.json()
         assert len(response_data) > 0
         firs_review = response_data[0]
@@ -86,7 +77,6 @@ class TestReviews:
     def test_get_reviews_invalid_id(self, api_manager:ApiManager):
         movies_id = -1
         response = api_manager.movies_api.get_reviews(movie_id=movies_id, expected_status=404)
-        assert response.status_code == 404
         response_data = response.json()
         assert response_data["message"] == "Фильм не найден"
 
@@ -94,39 +84,32 @@ class TestReviews:
         movies_id = created_reviews
         api_manager.movies_api.delete_reviews(movie_id=movies_id)
         response = api_manager.movies_api.get_reviews(movie_id=movies_id)
-        assert response.status_code == 200
         response_data = response.json()
         assert len(response_data) == 0
         assert response_data == []
 
-    def test_show_reviews(self, created_reviews, api_manager:ApiManager):
+    def test_show_reviews(self, created_reviews, auth_session, api_manager:ApiManager):
         movies_id = created_reviews
-        response = api_manager.movies_api.show_review(movie_id=movies_id)
-        assert response.status_code == 200
+        response = api_manager.movies_api.show_review(movie_id=movies_id, user_Id=auth_session)
         response_data = response.json()
         assert "text" in response_data
         assert "rating" in response_data
 
-    def test_show_reviews_invalid_id(self, api_manager:ApiManager):
-        api_manager.auth_api.authenticate()
+    def test_show_reviews_invalid_id(self, auth_session, api_manager:ApiManager):
         movie_data = -1
-        response = api_manager.movies_api.show_review(movie_id=movie_data, expected_status=404)
-        assert response.status_code == 404
+        response = api_manager.movies_api.show_review(movie_id=movie_data, user_Id=auth_session, expected_status=404)
         response_data = response.json()
         assert response_data["message"] == "Отзыв не найден"
 
-    def test_hide_reviews(self, created_reviews, api_manager:ApiManager):
+    def test_hide_reviews(self, created_reviews, auth_session, api_manager:ApiManager):
         movie_id = created_reviews
-        response = api_manager.movies_api.hide_review(movie_id=movie_id)
-        assert response.status_code == 200
+        response = api_manager.movies_api.hide_review(movie_id=movie_id, user_Id=auth_session)
         response_data = response.json()
         assert "text" in response_data
         assert "rating" in response_data
 
-    def test_hide_reviews_invalid_id(self, api_manager:ApiManager):
-        api_manager.auth_api.authenticate()
+    def test_hide_reviews_invalid_id(self, auth_session, api_manager:ApiManager):
         movie_data = -1
-        response = api_manager.movies_api.show_review(movie_id=movie_data, expected_status=404)
-        assert response.status_code == 404
+        response = api_manager.movies_api.hide_review(movie_id=movie_data, user_Id=auth_session, expected_status=404)
         response_data = response.json()
         assert response_data["message"] == "Отзыв не найден"

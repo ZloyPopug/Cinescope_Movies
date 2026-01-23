@@ -25,3 +25,4 @@ class AuthAPI(CustomRequester):
 
         token = response["accessToken"]
         self.session.headers.update({"Authorization": f"Bearer {token}"})
+        return response

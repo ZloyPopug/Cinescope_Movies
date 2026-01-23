@@ -73,16 +73,16 @@ class MoviesAPI(CustomRequester):
             expected_status=expected_status
         )
 
-    def hide_review(self, movie_id, expected_status=200):
+    def hide_review(self, movie_id, user_Id, expected_status=200):
         return self.send_request(
             method="PATCH",
-            endpoint=f"{MOVIE_ENDPOINT}/{movie_id}/{HIDE_ENDPOINT}",
+            endpoint=f"{MOVIE_ENDPOINT}/{movie_id}/{HIDE_ENDPOINT}/{user_Id}",
             expected_status=expected_status
         )
 
-    def show_review(self, movie_id, expected_status=200):
+    def show_review(self, movie_id, user_Id, expected_status=200):
         return self.send_request(
             method="PATCH",
-            endpoint=f"{MOVIE_ENDPOINT}/{movie_id}/{SHOW_ENDPOINT}",
+            endpoint=f"{MOVIE_ENDPOINT}/{movie_id}/{SHOW_ENDPOINT}/{user_Id}",
             expected_status=expected_status
         )
