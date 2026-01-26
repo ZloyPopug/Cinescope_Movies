@@ -1,5 +1,5 @@
 import random
-
+import string
 from faker import Faker
 
 faker = Faker()
@@ -69,3 +69,25 @@ class DataGenerator:
             "rating": random.randint(1, 10),
             "text": faker.catch_phrase()
         }
+
+    @staticmethod
+    def generate_random_email():
+        random_string = "".join(random.choices(string.ascii_letters + string.digits, k=8))
+        return f"topp{random_string}@gmail.com"
+
+    @staticmethod
+    def generate_random_name():
+        return f"{faker.first_name()} {faker.last_name()}"
+
+    @staticmethod
+    def generate_random_password():
+        letters = random.choice(string.ascii_uppercase)
+        digits = random.choice(string.digits)
+        special_chars = "?@#$%^&*|:"
+        all_chars = string.ascii_letters + string.digits + special_chars
+        remaining_length = random.randint(6,18)
+        remaining_chars = "".join(random.choices(all_chars, k=remaining_length))
+        password = list(letters + digits + remaining_chars)
+        random.shuffle(password)
+        return "".join(password)
+

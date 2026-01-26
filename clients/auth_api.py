@@ -13,10 +13,10 @@ class AuthAPI(CustomRequester):
             expected_status=expected_status
         )
 
-    def authenticate(self):
+    def authenticate(self, user_creds):
         login_data = {
-            "email": "api1@gmail.com",
-            "password": "asdqwe123Q"
+            "email": user_creds[0],
+            "password": user_creds[1]
         }
 
         response = self.login_user(login_data).json()
