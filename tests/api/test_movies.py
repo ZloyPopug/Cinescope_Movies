@@ -1,5 +1,5 @@
-from http.client import responses
-
+import pytest
+from conftest import super_admin, common_user, admin_user
 from utils.data_generator import DataGenerator
 
 class TestMovies:
@@ -18,9 +18,11 @@ class TestMovies:
         assert "createdAt" in response_data
         assert "genre" in response_data
 
+    @pytest.mark.slow
     def test_create_movie_user(self, common_user, movie_data):
         common_user.api.movies_api.create_movie(movie_data=movie_data, expected_status=403)
 
+    @pytest.mark.slow
     def test_create_movie_admin(self, admin_user, movie_data):
         admin_user.api.movies_api.create_movie(movie_data=movie_data, expected_status=403)
 
@@ -43,6 +45,7 @@ class TestMovies:
         movie_id = created_movie["id"]
         super_admin.api.movies_api.get_movie(movie_id=movie_id)
 
+    @pytest.mark.slow
     def test_get_movie_invalid_id(self, common_user):
         common_user.api.movies_api.get_movie(movie_id=-1, expected_status=404)
 
@@ -115,4 +118,27 @@ class TestMovies:
             "maxPrice": "Строка"
         }
         super_admin.api.movies_api.get_movies_with_filters(params=params, expected_status=400)
+
+    @pytest.mark.parametrize("minPrice,maxPrice,locations,genreId", [(100, 400, "MSK", 2), (200, 800, "SPB", 1)], ids=['MSK', "SPB"])
+    def test_get_params(self, super_admin, minPrice, maxPrice, locations, genreId):
+        params = {
+            "minPrice": minPrice,
+            "maxPrice": maxPrice,
+            "locations": locations,
+            "genreId": genreId
+        }
+        response = super_admin.api.movies_api.get_movies_with_filters(params=params)
+        movies = response.json()["movies"]
+        for movie in movies:
+            assert movie["price"] > minPrice
+            assert movie["price"] < maxPrice
+            assert movie["location"] == locations
+            assert movie["genreId"] == genreId
+
+    @pytest.mark.slow
+    @pytest.mark.parametrize("fixture_name,expected_status",[("super_admin", 200), ("common_user", 403), ("admin_user", 403)])
+    def test_delete_movie_roles(self, request, created_movie, fixture_name,expected_status):
+        movie_id = created_movie["id"]
+        user = request.getfixturevalue(fixture_name)
+        user.api.movies_api.delete_movie(movie_id=movie_id, expected_status=expected_status)
 

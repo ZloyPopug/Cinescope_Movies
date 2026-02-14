@@ -4,9 +4,10 @@ from entities.user import User
 import requests
 from constans import BASE_URL
 import pytest
-from custom_requester.custom_requester import CustomRequester
 from utils.data_generator import DataGenerator
 from constants.roles import Roles
+from models.base_model import BaseUser
+
 
 
 @pytest.fixture(scope="session")
@@ -104,35 +105,35 @@ def super_admin(user_session):
     return super_admin
 
 @pytest.fixture(scope="function")
-def test_user():
+def test_user() -> BaseUser:
     random_email = DataGenerator.generate_random_email()
     random_fullname = DataGenerator.generate_random_name()
     random_password = DataGenerator.generate_random_password()
 
-    return {
-        "email": random_email,
-        "fullName": random_fullname,
-        "password": random_password,
-        "passwordRepeat": random_password,
-        "roles": [Roles.USER.value]
-    }
+    return BaseUser(
+        email=random_email,
+        fullName=random_fullname,
+        password=random_password,
+        passwordRepeat=random_password,
+        roles=[Roles.USER]
+    )
 
 @pytest.fixture(scope="function")
-def creation_user_data(test_user):
-    updated_data = test_user.copy()
-    updated_data.update({
-        "verified": True,
-        "banned": False
-    })
-    return updated_data
+def creation_user_data(test_user: BaseUser) -> BaseUser:
+    return test_user.model_copy(
+        update={
+            "verified" : True,
+            "banned" : False
+        }
+    )
 
 @pytest.fixture
 def common_user(user_session, super_admin, creation_user_data):
     new_session = user_session()
 
     common_user = User(
-        creation_user_data['email'],
-        creation_user_data['password'],
+        creation_user_data.email,
+        creation_user_data.password,
         [Roles.USER.value],
         new_session)
 
@@ -145,8 +146,8 @@ def admin_user(user_session, super_admin, creation_user_data):
     new_session = user_session()
 
     admin_user = User(
-        creation_user_data['email'],
-        creation_user_data['password'],
+        creation_user_data.email,
+        creation_user_data.password,
         [Roles.ADMIN.value],
         new_session)
 

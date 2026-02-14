@@ -1,4 +1,4 @@
-from constans import LOGIN_ENDPOINT
+from constans import LOGIN_ENDPOINT, REGISTER_ENDPOINT
 from custom_requester.custom_requester import CustomRequester
 
 class AuthAPI(CustomRequester):
@@ -9,6 +9,14 @@ class AuthAPI(CustomRequester):
         return self.send_request(
             method="POST",
             endpoint=LOGIN_ENDPOINT,
+            data=user_data,
+            expected_status=expected_status
+        )
+
+    def register_user(self, user_data, expected_status=201):
+        return self.send_request(
+            method='POST',
+            endpoint=REGISTER_ENDPOINT,
             data=user_data,
             expected_status=expected_status
         )

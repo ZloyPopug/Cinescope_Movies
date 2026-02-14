@@ -1,4 +1,4 @@
-from clients.api_manager import ApiManager
+import pytest
 
 class TestReviews:
     def test_create_reviews(self, created_movie, reviews_data, super_admin):
@@ -51,6 +51,7 @@ class TestReviews:
         movie_id = -1
         super_admin.api.reviews_api.update_reviews(movie_id=movie_id, reviews_data=reviews_data, expected_status=404)
 
+    @pytest.mark.slow
     def test_delete_reviews(self, created_reviews, super_admin):
         movie_id = created_reviews
         super_admin.api.reviews_api.delete_reviews(movie_id=movie_id)
