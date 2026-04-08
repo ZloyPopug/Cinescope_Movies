@@ -10,3 +10,5 @@ __pycache__/
 *.csv
 *.env
 .env
+db_requester/db_client_example.py
+db_requester/sql_alchemy_client_simple_example.py

@@ -1,5 +1,7 @@
+import datetime
 import random
 import string
+from datetime import datetime
 from faker import Faker
 
 faker = Faker()
@@ -91,3 +93,33 @@ class DataGenerator:
         random.shuffle(password)
         return "".join(password)
 
+    @staticmethod
+    def generate_user_data() -> dict:
+        from uuid import uuid4
+
+        return {
+            'id': f'{uuid4()}',
+            'email': DataGenerator.generate_random_email(),
+            'full_name': DataGenerator.generate_random_name(),
+            'password': DataGenerator.generate_random_password(),
+            'created_at': datetime.datetime.now(),
+            'updated_at': datetime.datetime.now(),
+            'verified': False,
+            'banned': False,
+            'roles': '{USER}'
+        }
+
+    @staticmethod
+    def generate_movie_data_for_db(exclude_genre_id=None):
+        """Данные для БД ожидают по разному"""
+        return {
+            "name": DataGenerator.generate_random_movie_name(),
+            "image_url": DataGenerator.generate_random_image_url(),
+            "price": DataGenerator.generate_random_price(),
+            "description": DataGenerator.generate_random_description(),
+            "location": DataGenerator.generate_random_location(),
+            "published": DataGenerator.generate_random_published(),
+            "genre_id": DataGenerator.generate_random_genreId(exclude_genre_id),
+            "rating": round(random.uniform(1, 10), 2),
+            "created_at": datetime.now()
+        }

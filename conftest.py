@@ -7,6 +7,10 @@ import pytest
 from utils.data_generator import DataGenerator
 from constants.roles import Roles
 from models.base_model import BaseUser
+from sqlalchemy.orm import Session
+from db_requester.db_client import get_db_session
+from db_requester.db_helpers import DBHelper
+import time
 
 
 
@@ -158,3 +162,36 @@ def admin_user(user_session, super_admin, creation_user_data):
     }, user_locator=user_id)
     admin_user.api.auth_api.authenticate(admin_user.creds)
     return admin_user
+
+@pytest.fixture(scope='module')
+def db_session() -> Session:
+    db_session = get_db_session()
+    yield db_session
+    db_session.close()
+
+@pytest.fixture(scope='function')
+def db_helper(db_session) -> DBHelper:
+    db_helper = DBHelper(db_session)
+    return db_helper
+
+@pytest.fixture(scope="function")
+def created_test_user(db_helper):
+    """
+    Фикстура, которая создает тестового пользователя в БД
+    и удаляет его после завершения теста
+    """
+    user = db_helper.create_test_user(DataGenerator.generate_user_data())
+    yield user
+    # Cleanup после теста
+    if db_helper.get_user_id(user.id):
+        db_helper.delete_user(user)
+
+@pytest.fixture(scope="function")
+def created_movie_db(db_helper):
+    movie = db_helper.create_test_movie(DataGenerator.generate_movie_data_for_db())
+    return movie
+
+@pytest.fixture #была добавлена в файл conftest.py
+def delay_between_retries():
+    time.sleep(2)  # Задержка в 2 секунды\ это не обязательно но
+    yield          # нужно понимать что такая возможность имеется
