@@ -2,6 +2,8 @@ import pytest
 from conftest import super_admin, common_user, admin_user
 from utils.data_generator import DataGenerator
 import allure
+from models.movies_model import MovieResponse, BaseMovie
+
 
 @allure.epic("Тестирование Фильмов")
 class TestMovies:
@@ -10,23 +12,22 @@ class TestMovies:
     @allure.label("qa_name", "Sergey Guldeev")
     @pytest.mark.api
     @pytest.mark.regression
-    def test_create_movie(self, super_admin, movie_data):
+    def test_create_movie(self, super_admin, movie_data: BaseMovie):
         with allure.step("Создаем фильм под ролью Супер админа"):
             response = super_admin.api.movies_api.create_movie(movie_data=movie_data)
-            response_data = response.json()
+            response_movie = MovieResponse(**response.json())
         with allure.step("Сравниваем поля фильма с исходными данными"):
-            assert response_data["name"] == movie_data["name"]
-            assert response_data["price"] == movie_data["price"]
-            assert response_data["description"] == movie_data["description"]
-            assert response_data["location"] == movie_data["location"]
-            assert response_data["imageUrl"] == movie_data["imageUrl"]
-            assert response_data["genreId"] == movie_data["genreId"]
+            assert response_movie.name == movie_data.name
+            assert response_movie.price == movie_data.price
+            assert response_movie.description == movie_data.description
+            assert response_movie.location == movie_data.location
+            assert response_movie.imageUrl == movie_data.imageUrl
+            assert response_movie.genreId == movie_data.genreId
         with allure.step("Проверяем есть ли поля в созданном фильме"):
-            assert "id" in response_data
-            assert "published" in response_data
-            assert "rating" in response_data
-            assert "createdAt" in response_data
-            assert "genre" in response_data
+            assert response_movie.id is not None
+            assert response_movie.published is not None
+            assert response_movie.createdAt is not None
+            assert response_movie.genre.name is not None
 
     @allure.story("Попытка создания фильма под Ролью Юзер")
     @allure.severity(allure.severity_level.CRITICAL)
@@ -34,7 +35,7 @@ class TestMovies:
     @pytest.mark.api
     @pytest.mark.regression
     @pytest.mark.slow
-    def test_create_movie_user(self, common_user, movie_data):
+    def test_create_movie_user(self, common_user, movie_data: BaseMovie):
         with allure.step("Пытаемся создать фильм под ролью Юзер"):
             common_user.api.movies_api.create_movie(movie_data=movie_data, expected_status=403)
 
@@ -44,7 +45,7 @@ class TestMovies:
     @pytest.mark.api
     @pytest.mark.regression
     @pytest.mark.slow
-    def test_create_movie_admin(self, admin_user, movie_data):
+    def test_create_movie_admin(self, admin_user, movie_data: BaseMovie):
         with allure.step("Пытаемся создать фильм под ролью Админа"):
             admin_user.api.movies_api.create_movie(movie_data=movie_data, expected_status=403)
 
@@ -53,7 +54,7 @@ class TestMovies:
     @allure.label("qa_name", "Sergey Guldeev")
     @pytest.mark.api
     @pytest.mark.regression
-    def test_create_movie_already_exists(self, created_movie, super_admin, movie_data):
+    def test_create_movie_already_exists(self, created_movie, super_admin, movie_data: BaseMovie):
         with allure.step("Пытаемся создать фильм с тем же тестовыми данными"):
             super_admin.api.movies_api.create_movie(movie_data=movie_data, expected_status=409)
 
@@ -62,9 +63,9 @@ class TestMovies:
     @allure.label("qa_name", "Sergey Guldeev")
     @pytest.mark.api
     @pytest.mark.regression
-    def test_create_movie_missing_required_field_name(self, super_admin, movie_data):
+    def test_create_movie_missing_required_field_name(self, super_admin, movie_data: BaseMovie):
         with allure.step("Делаем копию тестовых данных и удаляем поле name"):
-            invalid_data = movie_data.copy()
+            invalid_data = movie_data.model_dump()
             del invalid_data["name"]
         with allure.step("Пытаемся создать фильм без поля name"):
             response = super_admin.api.movies_api.create_movie(movie_data=invalid_data,expected_status=400)
@@ -78,9 +79,9 @@ class TestMovies:
     @allure.label("qa_name", "Sergey Guldeev")
     @pytest.mark.api
     @pytest.mark.regression
-    def test_create_movie_invalid_values(self, super_admin, movie_data):
+    def test_create_movie_invalid_values(self, super_admin, movie_data: BaseMovie):
         with allure.step("Делаем копию тестовых данных и меняем поле name"):
-            invalid_data = movie_data.copy()
+            invalid_data = movie_data.model_dump()
             invalid_data["name"] = 123
         with allure.step("Пытаемся создать фильм с неккоректным полем name"):
             response = super_admin.api.movies_api.create_movie(movie_data=invalid_data,expected_status=400)
@@ -95,7 +96,7 @@ class TestMovies:
     @pytest.mark.api
     @pytest.mark.regression
     def test_get_movie(self, created_movie, super_admin):
-        movie_id = created_movie["id"]
+        movie_id = created_movie.id
         with allure.step("Получаем фильм по id"):
             super_admin.api.movies_api.get_movie(movie_id=movie_id)
 
@@ -115,7 +116,7 @@ class TestMovies:
     @pytest.mark.api
     @pytest.mark.regression
     def test_delete_movie(self, created_movie, super_admin):
-        movie_id = created_movie["id"]
+        movie_id = created_movie.id
         with allure.step("Удаляем фильм по id"):
             super_admin.api.movies_api.delete_movie(movie_id=movie_id)
 
@@ -135,23 +136,23 @@ class TestMovies:
     @pytest.mark.regression
     def test_update_movie(self, created_movie, super_admin):
         with allure.step("Записываем id созданного фильма в переменную"):
-            movie_id = created_movie["id"]
+            movie_id = created_movie.id
         with allure.step("Создаем переменную с данными созданного фильма"):
             original_data = created_movie.copy()
         with allure.step("Генерируем новые данные для создания фильма"):
-            new_data = DataGenerator.generate_movie_data(exclude_genre_id=original_data["genreId"])
+            new_data = DataGenerator.generate_movie_data(exclude_genre_id=original_data.genreId)
         with allure.step("Проверяем что данные не одинаковые"):
-            assert new_data["name"] != original_data["name"], "Сгенерировались одинаковые данные"
+            assert new_data.name != original_data.name, "Сгенерировались одинаковые данные"
         with allure.step("Обновляем фильм с новыми данными по id"):
             response = super_admin.api.movies_api.update_movie(movie_id=movie_id, movie_data=new_data)
-        update_data = response.json()
+        update_data = MovieResponse(**response.json())
         with allure.step("Сравниваем поля фильма с исходными данными, проверяя что они не одинаковы"):
-            assert new_data["name"] == update_data["name"]
-            assert update_data["name"] != original_data["name"]
-            assert update_data["price"] != original_data["price"]
-            assert update_data["description"] != original_data["description"]
-            assert update_data["imageUrl"] != original_data["imageUrl"]
-            assert update_data["genreId"] != original_data["genreId"]
+            assert new_data.name == update_data.name
+            assert update_data.name != original_data.name
+            assert update_data.price != original_data.price
+            assert update_data.description != original_data.description
+            assert update_data.imageUrl != original_data.imageUrl
+            assert update_data.genreId != original_data.genreId
 
     @allure.story("Тестирование Обновления фильма с невалидным полем")
     @allure.severity(allure.severity_level.CRITICAL)
@@ -160,15 +161,15 @@ class TestMovies:
     @pytest.mark.regression
     def test_update_movie_invalid_value(self, created_movie, super_admin):
         with allure.step("Записываем id созданного фильма в переменную"):
-            movie_id = created_movie["id"]
+            movie_id = created_movie.id
         with allure.step("Создаем переменную с данными созданного фильма"):
             original_data = created_movie.copy()
         with allure.step("Генерируем новые данные для создания фильма"):
             new_data = DataGenerator.generate_movie_data()
         with allure.step("Проверяем что данные не одинаковые"):
-            assert new_data["name"] != original_data["name"], "Сгенерировались одинаковые данные"
+            assert new_data.name != original_data.name, "Сгенерировались одинаковые данные"
         with allure.step("Меняем поле name на неваилидное значение"):
-            new_data["name"] = 123
+            new_data.name = 123
         with allure.step("Пытаемся обновить фильм с невалидными данными"):
            response = super_admin.api.movies_api.update_movie(movie_id=movie_id, movie_data=new_data, expected_status=400)
         response_data = response.json()
@@ -192,7 +193,7 @@ class TestMovies:
         with allure.step("Генерируем новые данные для создания фильма"):
             new_data = DataGenerator.generate_movie_data()
         with allure.step("Проверяем что данные не одинаковые"):
-            assert new_data["name"] != original_data["name"], "Сгенерировались одинаковые данные"
+            assert new_data.name != original_data.name, "Сгенерировались одинаковые данные"
         with allure.step("Пытаемся обновить фильм с невалидным id"):
             response = super_admin.api.movies_api.update_movie(movie_data=new_data, movie_id=-1, expected_status=404)
         response_data = response.json()
@@ -295,8 +296,30 @@ class TestMovies:
     @pytest.mark.parametrize("fixture_name,expected_status",[("super_admin", 200), ("common_user", 403), ("admin_user", 403)])
     def test_delete_movie_roles(self, request, created_movie, fixture_name,expected_status):
         with allure.step("Записывем id созданного фильма в переменную"):
-            movie_id = created_movie["id"]
+            movie_id = created_movie.id
         user = request.getfixturevalue(fixture_name)
         with allure.step("Пытаемся удалить фильм"):
             user.api.movies_api.delete_movie(movie_id=movie_id, expected_status=expected_status)
+
+    @allure.story("Создание фильма с проверкой в БД")
+    @allure.severity(allure.severity_level.CRITICAL)
+    @allure.label("qa_name", "Sergey Guldeev")
+    @pytest.mark.api
+    @pytest.mark.regression
+    @pytest.mark.db
+    def test_db_movie(self, super_admin, db_helper, created_movie_db):
+        with allure.step("Генерируем тестовые данные для фильма"):
+            movie_date = DataGenerator.generate_movie_data()
+            movie_name = movie_date.name
+        with allure.step("Проверяем, что фильма нет в БД до создания"):
+            assert db_helper.get_movie_by_name(movie_name) is None
+        with allure.step("Создаем фильм через API"):
+            created_mov = super_admin.api.movies_api.create_movie(movie_date)
+            movie_id = created_mov.json()['id']
+        with allure.step("Проверяем, что фильм появился в БД"):
+            assert db_helper.get_movie_by_name(movie_name) is not None
+        with allure.step("Удаляем фильм через API"):
+            super_admin.api.movies_api.delete_movie(movie_id=movie_id)
+        with allure.step("Проверяем, что фильм удален из БД"):
+            assert db_helper.get_movie_by_name(movie_name) is None
 

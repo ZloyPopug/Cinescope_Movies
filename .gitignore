@@ -12,3 +12,5 @@ __pycache__/
 .env
 db_requester/db_client_example.py
 db_requester/sql_alchemy_client_simple_example.py
+db_requester/db_example_test.py
+db_requester/mock.py

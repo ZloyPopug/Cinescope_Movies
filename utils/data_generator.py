@@ -3,6 +3,7 @@ import random
 import string
 from datetime import datetime
 from faker import Faker
+from models.movies_model import BaseMovie
 
 faker = Faker()
 
@@ -42,15 +43,15 @@ class DataGenerator:
 
     @staticmethod
     def generate_movie_data(exclude_genre_id=None):
-        return {
-            "name": DataGenerator.generate_random_movie_name(),
-            "imageUrl": DataGenerator.generate_random_image_url(),
-            "price": DataGenerator.generate_random_price(),
-            "description": DataGenerator.generate_random_description(),
-            "location": DataGenerator.generate_random_location(),
-            "published": DataGenerator.generate_random_published(),
-            "genreId": DataGenerator.generate_random_genreId(exclude_genre_id)
-        }
+        return BaseMovie(
+            name=DataGenerator.generate_random_movie_name(),
+            imageUrl=DataGenerator.generate_random_image_url(),
+            price=DataGenerator.generate_random_price(),
+            description=DataGenerator.generate_random_description(),
+            location=DataGenerator.generate_random_location(),
+            published=DataGenerator.generate_random_published(),
+            genreId=DataGenerator.generate_random_genreId(exclude_genre_id)
+        )
 
     @staticmethod
     def generate_movie_filter_params():

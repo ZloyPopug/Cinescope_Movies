@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from db_requester.db_client import get_db_session
 from db_requester.db_helpers import DBHelper
 import time
+from models.movies_model import BaseMovie, MovieResponse
 
 
 
@@ -26,7 +27,7 @@ def api_manager(session):
     return ApiManager(session)
 
 @pytest.fixture(scope="function")
-def movie_data():
+def movie_data() -> BaseMovie:
     random_name = DataGenerator.generate_random_movie_name()
     random_imageUrl = DataGenerator.generate_random_image_url()
     random_price = DataGenerator.generate_random_price()
@@ -35,22 +36,22 @@ def movie_data():
     random_published = DataGenerator.generate_random_published()
     random_genreId = DataGenerator.generate_random_genreId()
 
-    return {
-        "name": random_name,
-        "imageUrl": random_imageUrl,
-        "price": random_price,
-        "description": random_description,
-        "location": random_location,
-        "published": random_published,
-        "genreId": random_genreId
-    }
+    return BaseMovie(
+        name= random_name,
+        imageUrl= random_imageUrl,
+        price= random_price,
+        description= random_description,
+        location= random_location,
+        published= random_published,
+        genreId= random_genreId
+    )
 
 @pytest.fixture(scope="function")
-def created_movie(super_admin, movie_data):
+def created_movie(super_admin, movie_data: BaseMovie):
     response = super_admin.api.movies_api.create_movie(movie_data)
     assert response.status_code == 201
-    movie_info = response.json()
-    movie_id = movie_info["id"]
+    movie_info = MovieResponse(**response.json())
+    movie_id = movie_info.id
 
     yield movie_info
     try:
@@ -68,7 +69,7 @@ def reviews_data():
 
 @pytest.fixture(scope="function")
 def created_reviews(super_admin, created_movie, reviews_data):
-    movie_id = created_movie["id"]
+    movie_id = created_movie.id
     super_admin.api.reviews_api.create_reviews(movie_id=movie_id, reviews_data=reviews_data)
     return movie_id
 

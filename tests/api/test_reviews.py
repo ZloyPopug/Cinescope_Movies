@@ -10,7 +10,7 @@ class TestReviews:
     @pytest.mark.regression
     def test_create_reviews(self, created_movie, reviews_data, super_admin):
         with allure.step("Записываем id созданного фильма в переменную"):
-            movie_id = created_movie["id"]
+            movie_id = created_movie.id
         with allure.step("Создаем отзыв"):
             response = super_admin.api.reviews_api.create_reviews(movie_id=movie_id, reviews_data=reviews_data)
         response_data = response.json()
@@ -25,7 +25,7 @@ class TestReviews:
     @pytest.mark.regression
     def test_create_reviews_invalid_value(self, created_movie, super_admin):
         with allure.step("Записываем id созданного фильма в переменную"):
-            movie_id = created_movie["id"]
+            movie_id = created_movie.id
         with allure.step("Создаем переменную с невалидными данными"):
             invalid_data = {
                 "rating": "test",
@@ -193,33 +193,60 @@ class TestReviews:
             assert len(response_data) == 0
             assert response_data == []
 
-    @allure.story("Тестирование получения удаленного отзыва")
-    @allure.severity(allure.severity_level.NORMAL)
+    @allure.story("Тестирование включения отображения отзыва к фильму")
+    @allure.severity(allure.severity_level.CRITICAL)
     @allure.label("qa_name", "Sergey Guldeev")
     @pytest.mark.api
     @pytest.mark.regression
     def test_show_reviews(self, created_reviews, auth_session, super_admin):
-        movies_id = created_reviews
-        response = super_admin.api.reviews_api.show_review(movie_id=movies_id, user_Id=auth_session)
-        response_data = response.json()
-        assert "text" in response_data
-        assert "rating" in response_data
+        with allure.step("Записываем в переменную фильм с отзывом"):
+            movies_id = created_reviews
+        with allure.step("Включаем отображение отзыва к фильму"):
+            response = super_admin.api.reviews_api.show_review(movie_id=movies_id, user_Id=auth_session)
+        with allure.step("Проверяем что поля есть в отзыве"):
+            response_data = response.json()
+            assert "text" in response_data
+            assert "rating" in response_data
 
+    @allure.story("Тестирование включения отображения отзыва к фильму, по несуществующему id")
+    @allure.severity(allure.severity_level.NORMAL)
+    @allure.label("qa_name", "Sergey Guldeev")
+    @pytest.mark.api
+    @pytest.mark.regression
     def test_show_reviews_invalid_id(self, auth_session, super_admin):
-        movie_data = -1
-        response = super_admin.api.reviews_api.show_review(movie_id=movie_data, user_Id=auth_session, expected_status=404)
-        response_data = response.json()
-        assert response_data["message"] == "Отзыв не найден"
+        with allure.step("Создаем переменную с несуществующим id"):
+            movie_data = -1
+        with allure.step("Пытаемся включить отображение несуществующего отзыва"):
+            response = super_admin.api.reviews_api.show_review(movie_id=movie_data, user_Id=auth_session, expected_status=404)
+        with allure.step("Проверяем текст ошибки"):
+            response_data = response.json()
+            assert response_data["message"] == "Отзыв не найден"
 
+    @allure.story("Тестирование отключения отображения отзыва к фильму")
+    @allure.severity(allure.severity_level.CRITICAL)
+    @allure.label("qa_name", "Sergey Guldeev")
+    @pytest.mark.api
+    @pytest.mark.regression
     def test_hide_reviews(self, created_reviews, auth_session, super_admin):
-        movie_id = created_reviews
-        response = super_admin.api.reviews_api.hide_review(movie_id=movie_id, user_Id=auth_session)
-        response_data = response.json()
-        assert "text" in response_data
-        assert "rating" in response_data
+        with allure.step("Записываем в переменную фильм с отзывом"):
+            movie_id = created_reviews
+        with allure.step("Отключаем отображение отзыва к фильму"):
+            response = super_admin.api.reviews_api.hide_review(movie_id=movie_id, user_Id=auth_session)
+        with allure.step("Проверяем что поля есть в отзыве"):
+            response_data = response.json()
+            assert "text" in response_data
+            assert "rating" in response_data
 
+    @allure.story("Тестирование отключения отображения отзыва к фильму, по несуществующему id")
+    @allure.severity(allure.severity_level.NORMAL)
+    @allure.label("qa_name", "Sergey Guldeev")
+    @pytest.mark.api
+    @pytest.mark.regression
     def test_hide_reviews_invalid_id(self, auth_session, super_admin):
-        movie_data = -1
-        response = super_admin.api.reviews_api.hide_review(movie_id=movie_data, user_Id=auth_session, expected_status=404)
-        response_data = response.json()
-        assert response_data["message"] == "Отзыв не найден"
+        with allure.step("Создаем переменную с несуществующим id"):
+            movie_data = -1
+        with allure.step("Пытаемся отключить отображение несуществующего отзыва"):
+            response = super_admin.api.reviews_api.hide_review(movie_id=movie_data, user_Id=auth_session, expected_status=404)
+        with allure.step("Проверяем текст ошибки"):
+            response_data = response.json()
+            assert response_data["message"] == "Отзыв не найден"
